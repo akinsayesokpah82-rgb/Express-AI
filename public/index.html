@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Express AI — Chat</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <h1>Express AI</h1>
+      <p class="sub">Powerful assistant — say hi 👋</p>
+    </header>
+
+    <section class="chat-window" id="chatWindow">
+      <!-- messages appear here -->
+    </section>
+
+    <form id="chatForm" class="composer">
+      <select id="modelSelect" aria-label="Model">
+        <option value="gpt-4o-mini">gpt-4o-mini</option>
+        <option value="gpt-4o">gpt-4o</option>
+        <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+      </select>
+
+      <textarea id="messageInput" placeholder="Ask Express AI something..." rows="1"></textarea>
+
+      <div class="controls">
+        <input id="fileInput" type="file" />
+        <button type="submit">Send</button>
+      </div>
+    </form>
+  </main>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

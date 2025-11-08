@@ -3,36 +3,112 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Express AI — Chat</title>
-  <link rel="stylesheet" href="/css/styles.css" />
+  <title>Express AI — Modern</title>
+  <!-- Tailwind via CDN (for quick demo). For production, use proper build + Tailwind CLI. -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* small custom styles */
+    body { background: linear-gradient(180deg,#071026 0%, #081427 100%); }
+    .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(6px); }
+    .fade-in { animation: fadeIn 450ms ease both; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px);} to {opacity:1; transform:none;} }
+  </style>
 </head>
-<body>
-  <main class="app">
-    <header class="header">
-      <h1>Express AI</h1>
-      <p class="sub">Powerful assistant — say hi 👋</p>
-    </header>
+<body class="min-h-screen flex items-center justify-center p-6">
+  <div id="root" class="w-full max-w-4xl"></div>
 
-    <section class="chat-window" id="chatWindow">
-      <!-- messages appear here -->
-    </section>
+  <!-- React + ReactDOM CDN for quick demo -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
-    <form id="chatForm" class="composer">
-      <select id="modelSelect" aria-label="Model">
-        <option value="gpt-4o-mini">gpt-4o-mini</option>
-        <option value="gpt-4o">gpt-4o</option>
-        <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
-      </select>
+  <script type="text/javascript">
+  const e = React.createElement;
+  const { useState, useEffect, useRef } = React;
 
-      <textarea id="messageInput" placeholder="Ask Express AI something..." rows="1"></textarea>
+  function App(){
+    const [messages, setMessages] = useState([
+      { role: 'assistant', content: 'Hello! I am Express AI — modern, fast, and helpful. Ask me anything.' }
+    ]);
+    const [input, setInput] = useState('');
+    const [provider, setProvider] = useState('openai');
+    const [model, setModel] = useState('gpt-4o-mini');
+    const [loading, setLoading] = useState(false);
+    const fileRef = useRef();
+    const scrollRef = useRef();
 
-      <div class="controls">
-        <input id="fileInput" type="file" />
-        <button type="submit">Send</button>
-      </div>
-    </form>
-  </main>
+    useEffect(()=>{ scrollRef.current?.scrollIntoView({behavior:'smooth'}); }, [messages]);
 
-  <script src="/js/app.js"></script>
+    async function send(){
+      if(!input.trim()) return;
+      const userMsg = { role: 'user', content: input };
+      setMessages(prev => [...prev, userMsg]);
+      setInput('');
+      setLoading(true);
+
+      // handle file if present
+      if (fileRef.current && fileRef.current.files.length){
+        const form = new FormData();
+        form.append('file', fileRef.current.files[0]);
+        try{
+          const r = await fetch('/api/upload', { method:'POST', body: form });
+          const j = await r.json();
+          if (j?.file) {
+            setMessages(prev=>[...prev,{ role:'assistant', content:`Uploaded ${j.file.originalName}` }]);
+          }
+        }catch(err){ setMessages(prev=>[...prev,{role:'assistant', content:'Upload failed: '+err.message}]); }
+      }
+
+      try{
+        const resp = await fetch('/api/chat',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ messages:[userMsg], provider, model }) });
+        const data = await resp.json();
+        // Extract assistant content based on provider (OpenAI-like or Google-like)
+        let assistantText = '';
+        if (data?.choices && data.choices[0]?.message?.content) assistantText = data.choices[0].message.content;
+        else if (data?.candidates && data.candidates[0]?.content) assistantText = data.candidates[0].content;
+        else assistantText = JSON.stringify(data).slice(0,1000);
+
+        setMessages(prev=>[...prev, { role:'assistant', content: assistantText }]);
+      }catch(err){ setMessages(prev=>[...prev,{ role:'assistant', content: 'Error: '+String(err) }]); }
+      finally{ setLoading(false); fileRef.current.value=''; }
+    }
+
+    return e('div', { className:'glass rounded-2xl p-6 shadow-2xl border border-white/4' },
+      e('header', { className:'flex items-center justify-between mb-4' },
+        e('div', null, e('h1', { className:'text-2xl font-semibold' }, 'Express AI'), e('p',{className:'text-sm text-white/70'}, 'Modern • Classical • Stylish')),
+        e('div', null,
+          e('select', { value: provider, onChange: e=>setProvider(e.target.value), className:'mr-2 rounded px-3 py-2 bg-transparent border border-white/6' },
+            e('option', { value:'openai' }, 'OpenAI'),
+            e('option', { value:'google' }, 'Google AI Studio'),
+            e('option', { value:'banana' }, 'Banana (Nano)')
+          ),
+          e('select', { value: model, onChange: e=>setModel(e.target.value), className:'rounded px-3 py-2 bg-transparent border border-white/6' },
+            e('option', { value:'gpt-4o-mini' }, 'gpt-4o-mini'),
+            e('option', { value:'gpt-4o' }, 'gpt-4o'),
+            e('option', { value:'gpt-3.5-turbo' }, 'gpt-3.5-turbo')
+          )
+        )
+      ),
+
+      e('main', { className:'h-[60vh] overflow-auto mb-4 p-4 rounded-lg bg-gradient-to-b from-black/10 to-transparent' },
+        messages.map((m, i) => e('div', { key:i, className: `mb-3 flex ${m.role==='user' ? 'justify-end' : 'justify-start'} fade-in` },
+          e('div', { className: `${m.role==='user' ? 'bg-indigo-600 text-white' : 'bg-white/5 text-white'} p-3 rounded-lg max-w-[78%]` },
+            e('div', { style:{whiteSpace:'pre-wrap'} }, m.content)
+          )
+        )),
+        e('div', { ref: scrollRef })
+      ),
+
+      e('form', { onSubmit: e=>{ e.preventDefault(); send(); }, className:'flex gap-3 items-end' },
+        e('input', { className:'flex-1 p-3 rounded bg-transparent border border-white/6', placeholder:'Ask Express AI something…', value:input, onChange: e=>setInput(e.target.value) }),
+        e('input', { type:'file', ref: fileRef }),
+        e('button', { type:'submit', className:'px-4 py-2 bg-indigo-600 rounded text-white disabled:opacity-60', disabled:loading }, loading ? 'Thinking…' : 'Send')
+      ),
+
+      e('footer', { className:'mt-4 text-sm text-white/60' }, 'Built by Akin S. Sokpah • Modernized UI — add API keys on the server to enable providers')
+    );
+  }
+
+  ReactDOM.render(e(App), document.getElementById('root'));
+  </script>
 </body>
 </html>

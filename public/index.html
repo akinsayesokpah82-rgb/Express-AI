@@ -1,123 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Express AI — Created by Akin S. Sokpah</title>
+<!-- Put this in sidebar or header -->
+<div class="mt-4">
+  <h4 class="text-sm text-white/70 mb-2">Updates</h4>
+  <button id="newsBtn" class="w-full mb-2 py-2 bg-gray-700 rounded">Latest News</button>
+  <button id="sportsBtn" class="w-full mb-2 py-2 bg-gray-700 rounded">Sports Score</button>
+  <button id="weatherBtn" class="w-full mb-2 py-2 bg-gray-700 rounded">Weather</button>
+</div>
 
-  <!-- SEO -->
-  <meta name="description" content="Express AI – The world’s smartest virtual assistant built by Akin S. Sokpah (Liberian). Ask @expressai anything in real time!" />
-  <meta name="keywords" content="Express AI, Akin S. Sokpah, Liberian AI, college students chat" />
-  <meta name="author" content="Akin S. Sokpah" />
-  <meta name="robots" content="index,follow" />
-  <link rel="canonical" href="https://express-ai.onrender.com" />
-
-  <!-- Google verification (your codes) -->
-  <meta name="google-site-verification" content="-76G_hyg_NddKczNsJ1o256fMZuyM2OJGLH_elN2BCo" />
-  <meta name="google-site-verification" content="tpgWFUV2efWteh-q3mPwS6zTbHR0llUfimFDqXksQjQ" />
-  <meta name="google-site-verification" content="google719635f5627ba863.html" />
-
-  <!-- Open Graph -->
-  <meta property="og:title" content="Express AI — Smart Assistant" />
-  <meta property="og:description" content="Created by Akin S. Sokpah. Ask @expressai anything." />
-  <meta property="og:image" content="https://express-ai.onrender.com/logo-512.png" />
-  <meta property="og:url" content="https://express-ai.onrender.com" />
-  <meta name="twitter:card" content="summary_large_image" />
-
-  <link rel="manifest" href="/manifest.json" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body { background: linear-gradient(180deg,#071026 0%, #081427 100%); }
-    .bubble { max-width:78%; padding:10px 14px; border-radius:12px; }
-  </style>
-
-  <!-- Structured data (creator info without DOB) -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "Express AI",
-    "applicationCategory": "AI Assistant",
-    "operatingSystem": "Web",
-    "creator": {
-      "@type": "Person",
-      "name": "Akin S. Sokpah",
-      "nationality": "Liberian",
-      "parent": [
-        {"@type": "Person", "name": "Princess K. Sokpah"},
-        {"@type": "Person", "name": "A-Boy S. Sokpah"}
-      ]
-    },
-    "description": "Express AI is a smart conversational assistant powered by GPT-level reasoning. It can chat, learn, and collaborate across topics, created by Akin S. Sokpah.",
-    "url": "https://express-ai.onrender.com",
-    "image": "https://express-ai.onrender.com/logo-512.png",
-    "softwareVersion": "2.0.0",
-    "license": "MIT"
-  }
-  </script>
-</head>
-<body class="h-screen text-white flex flex-col">
-
-  <div class="flex flex-1">
-    <!-- Sidebar -->
-    <aside class="w-72 bg-gray-850 p-4 border-r border-white/6 flex flex-col">
-      <div class="mb-4">
-        <h1 class="text-xl font-semibold">Express AI</h1>
-        <p class="text-xs text-white/70">College Students Group Chat</p>
-      </div>
-      <div class="mb-3">
-        <button id="newRoomBtn" class="w-full py-2 bg-indigo-600 rounded">+ New Room</button>
-      </div>
-      <div id="roomsList" class="flex-1 overflow-auto"></div>
-      <div id="authButtons" class="mt-4"></div>
-    </aside>
-
-    <!-- Main area -->
-    <main class="flex-1 flex flex-col">
-      <header class="p-4 border-b border-white/6 flex items-center justify-between">
-        <div>
-          <h2 id="roomTitle" class="text-lg font-semibold">College Students Group Chat</h2>
-          <div id="roomMeta" class="text-xs text-white/60">public • AI: @expressai (tag to call)</div>
-        </div>
-        <div class="flex items-center gap-3">
-          <select id="modelSelect" class="bg-transparent border border-white/6 rounded px-2 py-1">
-            <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
-            <option value="gpt-4o-mini">gpt-4o-mini</option>
-            <option value="gpt-4o">gpt-4o</option>
-          </select>
-        </div>
-      </header>
-
-      <section id="chatArea" class="flex-1 p-4 overflow-auto bg-gradient-to-b from-black/10 to-transparent">
-        <div id="messages" class="space-y-3"></div>
-      </section>
-
-      <footer class="p-4 bg-gray-800 flex gap-3 items-center">
-        <input id="chatInput" placeholder="Type @expressai to mention the assistant..." class="flex-1 p-3 rounded bg-gray-700" />
-        <input id="fileInput" type="file" class="hidden" />
-        <button id="fileBtn" class="px-3 py-2 bg-gray-600 rounded">📎</button>
-        <button id="sendBtn" class="px-4 py-2 bg-indigo-600 rounded">Send</button>
-      </footer>
-    </main>
-
-    <!-- Presence / admin -->
-    <aside class="w-80 bg-gray-850 p-4 border-l border-white/6">
-      <h3 class="font-semibold">Online</h3>
-      <div id="presenceList" class="mt-2"></div>
-      <hr class="my-3 border-white/6" />
-      <div id="adminPanel"></div>
-    </aside>
-  </div>
-
-  <!-- Firebase + App scripts -->
-  <script type="module" src="/js/firebase.js"></script>
-  <script type="module" src="/js/app.js"></script>
-
-  <!-- service worker registration -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(()=>{});
-    }
-  </script>
-</body>
-</html>
+<div class="mt-4">
+  <h4 class="text-sm text-white/70 mb-2">Subjects</h4>
+  <button id="nursingBtn" class="w-full mb-2 py-2 bg-gray-700 rounded">Nursing AI</button>
+  <button id="mathBtn" class="w-full mb-2 py-2 bg-gray-700 rounded">Math AI</button>
+  <button id="englishBtn" class="w-full mb-2 py-2 bg-gray-700 rounded">English AI</button>
+  <button id="monetizeBtn" class="w-full mb-2 py-2 bg-gray-700 rounded">Monetize AI</button>
+  <button id="songBtn" class="w-full mb-2 py-2 bg-gray-700 rounded">Song Generator</button>
+</div>

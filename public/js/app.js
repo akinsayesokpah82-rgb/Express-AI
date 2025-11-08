@@ -132,8 +132,6 @@ async function triggerAI(userText) {
   });
 
   try {
-    // build messages for OpenAI: include some recent context if desired
-    // For simplicity: send only the user's message and system prompt is added on server
     const resp = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -189,7 +187,7 @@ newRoomBtn.onclick = async () => {
   switchRoom(id, title);
 };
 
-// announce (admin client should use admin endpoint in server; here just posts a message and optionally calls backend)
+// announce (simple)
 announceBtn.onclick = async () => {
   const msg = prompt("Enter announcement:");
   if (!msg) return;

@@ -17,7 +17,7 @@ app.use(express.json({ limit: "1mb" }));
 app.use(express.static("public"));
 app.use(rateLimit({ windowMs: 60 * 1000, max: 120 }));
 
-// uploads (local) - if you prefer Firebase Storage we can switch later
+// uploads (local) - switch to Firebase Storage later if desired
 const UPLOAD_DIR = path.join(__dirname, "public", "uploads");
 fs.ensureDirSync(UPLOAD_DIR);
 const storage = multer.diskStorage({
@@ -26,12 +26,12 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+// SYSTEM PROMPT (creator info kept, DOB removed)
 const SYSTEM_PROMPT = `You are Express AI — an assistant built by Akin S. Sokpah (Liberian). If asked who created you, reply exactly with:
 Creator / Founder: Akin S. Sokpah
 Nationality: Liberian
 Mother: Princess K Sokpah
 Father: A-Boy S Sokpah
-Date of Birth of Founder: FEBRUARY 25, 2025
 
 Only respond in the group when directly mentioned with @expressai or when asked directly. Behave politely and help users with clear, concise answers.`;
 
@@ -50,7 +50,7 @@ async function callOpenAI(messages, model = "gpt-3.5-turbo") {
   return res.json();
 }
 
-// Chat proxy: expects messages array like OpenAI chat endpoint
+// Chat proxy
 app.post("/api/chat", async (req, res) => {
   try {
     const { messages = [], model = "gpt-3.5-turbo" } = req.body;

@@ -3,101 +3,139 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Express AI – Created by Akin S. Sokpah</title>
+  <title>Express AI — World's Smartest AI Assistant</title>
 
-  <!-- ✅ SEO -->
-  <meta name="description" content="Express AI – The world’s smartest virtual assistant built by Akin S. Sokpah (Liberian). Ask @expressai anything in real time!" />
-  <meta name="keywords" content="Express AI, Akin S. Sokpah, Liberian AI, free AI assistant, college students chat, ChatGPT alternative, Gemini AI, GPT-4 AI bot" />
-  <meta name="author" content="Akin S. Sokpah" />
-  <meta name="robots" content="index,follow" />
+  <!-- ✅ SEO + Social Meta -->
+  <meta name="title" content="Express AI — World's Smartest AI Assistant">
+  <meta name="description" content="Express AI is the next-generation intelligent assistant built by Akin S. Sokpah from Liberia. It combines Gemini, ChatGPT, and cloud intelligence for real-time smart responses.">
+  <meta name="author" content="Akin S. Sokpah">
+  <meta name="robots" content="index, follow">
+  <meta name="language" content="English">
+  <meta name="revisit-after" content="3 days">
 
-  <!-- ✅ Canonical link -->
-  <link rel="canonical" href="https://express-ai.onrender.com" />
+  <!-- Open Graph (Facebook / WhatsApp) -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://express-ai-2si1.onrender.com/">
+  <meta property="og:title" content="Express AI — Smartest Global Assistant">
+  <meta property="og:description" content="Created by Akin S. Sokpah, Express AI helps you learn, create, and connect — powered by advanced AI technology.">
+  <meta property="og:image" content="https://express-ai-2si1.onrender.com/logo-512.png">
 
-  <!-- ✅ Google Site Verification Tags -->
-  <meta name="google-site-verification" content="-76G_hyg_NddKczNsJ1o256fMZuyM2OJGLH_elN2BCo" />
-  <meta name="google-site-verification" content="tpgWFUV2efWteh-q3mPwS6zTbHR0llUfimFDqXksQjQ" />
-  <meta name="google-site-verification" content="google719635f5627ba863.html" />
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://express-ai-2si1.onrender.com/">
+  <meta name="twitter:title" content="Express AI — Smartest Global Assistant">
+  <meta name="twitter:description" content="Built by Akin S. Sokpah, Express AI combines Gemini + GPT intelligence.">
+  <meta name="twitter:image" content="https://express-ai-2si1.onrender.com/logo-512.png">
 
-  <!-- ✅ Open Graph / Social Preview -->
-  <meta property="og:title" content="Express AI – Free World-Class Virtual Assistant" />
-  <meta property="og:description" content="Created by Akin S. Sokpah from Liberia. Talk with @expressai, your all-in-one smart companion." />
-  <meta property="og:image" content="https://express-ai.onrender.com/logo.png" />
-  <meta property="og:url" content="https://express-ai.onrender.com" />
-  <meta name="twitter:card" content="summary_large_image" />
+  <!-- Mobile & App Settings -->
+  <meta name="theme-color" content="#111827">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="apple-touch-icon" href="/logo-512.png">
 
-  <!-- ✅ Web App / Theme -->
-  <meta name="theme-color" content="#111827" />
+  <!-- Google site verification -->
+  <meta name="google-site-verification" content="-76G_hyg_NddKczNsJ1o256fMZuyM2OJGLH_elN2BCo">
+  <meta name="google-site-verification" content="tpgWFUV2efWteh-q3mPwS6zTbHR0llUfimFDqXksQjQ">
+
+  <!-- PWA Manifest -->
   <link rel="manifest" href="/manifest.json" />
 
-  <!-- ✅ Tailwind CSS -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- ✅ Structured Data (AI Assistant Schema for Google) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Express AI",
+    "applicationCategory": "AI Assistant",
+    "operatingSystem": "Web",
+    "creator": {
+      "@type": "Person",
+      "name": "Akin S. Sokpah",
+      "nationality": "Liberian",
+      "birthDate": "2025-02-25",
+      "parent": [
+        {"@type": "Person", "name": "Princess K. Sokpah"},
+        {"@type": "Person", "name": "A-Boy S. Sokpah"}
+      ]
+    },
+    "description": "Express AI is a smart conversational assistant powered by GPT & Gemini-level reasoning. It can chat, learn, and collaborate across topics, created by Akin S. Sokpah.",
+    "url": "https://express-ai-2si1.onrender.com",
+    "image": "https://express-ai-2si1.onrender.com/logo-512.png",
+    "softwareVersion": "2.0.0",
+    "license": "MIT"
+  }
+  </script>
 </head>
 
-<body class="bg-gray-900 text-white flex flex-col h-screen">
-  <header class="flex justify-between items-center p-4 bg-gray-800">
-    <h1 class="text-2xl font-bold">🤖 Express AI</h1>
-    <div id="authButtons"></div>
+<body class="bg-gray-900 text-white flex flex-col min-h-screen">
+  <header class="bg-gray-800 p-4 text-center text-2xl font-bold">
+    🤖 Express AI
   </header>
 
-  <main id="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-3"></main>
+  <main class="flex-grow flex flex-col items-center justify-center text-center px-4">
+    <h1 class="text-3xl font-extrabold mb-2">Hi 👋, I'm Express AI</h1>
+    <p class="max-w-xl text-gray-300 mb-6">
+      The intelligent assistant built by <b>Akin S. Sokpah</b> — combining the brilliance of GPT & Gemini into one.
+    </p>
 
-  <footer class="p-4 bg-gray-800 flex items-center space-x-2">
-    <input id="chatInput" class="flex-1 p-2 rounded bg-gray-700 text-white"
-      placeholder="Type @expressai to ask AI..." />
-    <button id="sendBtn" class="px-4 py-2 bg-blue-600 rounded">Send</button>
-    <button id="micBtn" class="px-3 py-2 bg-gray-700 rounded">🎙️</button>
+    <div class="w-full max-w-md bg-gray-800 rounded-2xl shadow-lg p-4">
+      <div id="chat-box" class="h-80 overflow-y-auto mb-3 p-2 rounded-lg bg-gray-900"></div>
+      <div class="flex">
+        <input id="user-input" class="flex-grow bg-gray-700 p-3 rounded-l-lg outline-none" placeholder="Type @expressai your question..." />
+        <button id="send-btn" class="bg-blue-600 hover:bg-blue-700 px-5 py-3 rounded-r-lg font-semibold">Send</button>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-gray-800 text-gray-400 text-sm py-3 text-center">
+    © 2025 Express AI — Created by Akin S. Sokpah 🇱🇷
   </footer>
 
-  <!-- ✅ Firebase & App -->
-  <script type="module" src="./js/firebase.js"></script>
-  <script type="module" src="./js/app.js"></script>
-
-  <!-- ✅ Voice Synthesis -->
+  <!-- Chatbot Script -->
   <script>
-    const micBtn = document.getElementById('micBtn');
-    const chatInput = document.getElementById('chatInput');
+    const chatBox = document.getElementById("chat-box");
+    const userInput = document.getElementById("user-input");
+    const sendBtn = document.getElementById("send-btn");
 
-    if ('webkitSpeechRecognition' in window) {
-      const recognition = new webkitSpeechRecognition();
-      recognition.lang = 'en-US';
-      recognition.continuous = false;
-      recognition.interimResults = false;
-
-      micBtn.onclick = () => {
-        recognition.start();
-        micBtn.textContent = '🎙️ Listening...';
-      };
-
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        chatInput.value = transcript;
-        micBtn.textContent = '🎙️';
-      };
-
-      recognition.onerror = () => (micBtn.textContent = '🎙️');
-    } else {
-      micBtn.disabled = true;
-      micBtn.title = 'Voice not supported';
+    function appendMessage(sender, text) {
+      const div = document.createElement("div");
+      div.classList.add("my-2", "text-left");
+      div.innerHTML = `<b>${sender}:</b> ${text}`;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
     }
+
+    sendBtn.addEventListener("click", async () => {
+      const input = userInput.value.trim();
+      if (!input) return;
+      appendMessage("You", input);
+      userInput.value = "";
+
+      if (input.toLowerCase().includes("@expressai")) {
+        appendMessage("Express AI", "Thinking...");
+        // Replace with your AI API endpoint
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: input })
+        });
+        const data = await res.json();
+        chatBox.lastChild.innerHTML = `<b>Express AI:</b> ${data.reply}`;
+      }
+    });
   </script>
 
-  <!-- ✅ Typing / AI Thinking Animation -->
+  <!-- Service Worker -->
   <script>
-    const chatContainer = document.getElementById('chatContainer');
-    const typingDiv = document.createElement('div');
-    typingDiv.className = 'text-gray-400 italic';
-    typingDiv.textContent = 'Express AI is thinking...';
-
-    function showTyping() {
-      chatContainer.appendChild(typingDiv);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
-
-    function hideTyping() {
-      if (typingDiv.parentNode) typingDiv.remove();
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js")
+        .then(() => console.log("✅ Service Worker registered"))
+        .catch(err => console.error("SW registration failed:", err));
     }
   </script>
-
 </body>
 </html>

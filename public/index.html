@@ -30,6 +30,31 @@
     body { background: linear-gradient(180deg,#071026 0%, #081427 100%); }
     .bubble { max-width:78%; padding:10px 14px; border-radius:12px; }
   </style>
+
+  <!-- Structured data (creator info without DOB) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Express AI",
+    "applicationCategory": "AI Assistant",
+    "operatingSystem": "Web",
+    "creator": {
+      "@type": "Person",
+      "name": "Akin S. Sokpah",
+      "nationality": "Liberian",
+      "parent": [
+        {"@type": "Person", "name": "Princess K. Sokpah"},
+        {"@type": "Person", "name": "A-Boy S. Sokpah"}
+      ]
+    },
+    "description": "Express AI is a smart conversational assistant powered by GPT-level reasoning. It can chat, learn, and collaborate across topics, created by Akin S. Sokpah.",
+    "url": "https://express-ai.onrender.com",
+    "image": "https://express-ai.onrender.com/logo-512.png",
+    "softwareVersion": "2.0.0",
+    "license": "MIT"
+  }
+  </script>
 </head>
 <body class="h-screen text-white flex flex-col">
 

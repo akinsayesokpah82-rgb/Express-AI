@@ -1,5 +1,5 @@
 // server.js
-// Express AI — Backend Server (Fixed Firebase Admin Integration)
+// Express AI — Smart Version (Gemini + OpenAI Support)
 
 import express from "express";
 import cors from "cors";
@@ -7,9 +7,6 @@ import bodyParser from "body-parser";
 import admin from "firebase-admin";
 import fetch from "node-fetch";
 
-// Initialize Firebase Admin SDK
-// Make sure you have your Firebase service account key in Render environment variables
-// or you can safely use application default credentials if using Firebase Hosting
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.applicationDefault(),
@@ -17,30 +14,27 @@ if (!admin.apps.length) {
 }
 
 const db = admin.firestore();
-
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// 🔹 Simple endpoint to test backend
+// Environment variables
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
 app.get("/", (req, res) => {
-  res.send("🧠 Express AI backend is running successfully!");
+  res.send("🧠 Express AI backend with Smart AI is running successfully!");
 });
 
-// 🔹 Chat endpoint (handles user messages from frontend)
 app.post("/api/chat", async (req, res) => {
   try {
     const { message, user } = req.body;
 
-    // Only respond if message contains "@expressai"
-    if (!message.toLowerCase().includes("@expressai")) {
-      return res.json({ reply: "" });
-    }
+    if (!message) return res.json({ reply: "No message received." });
 
-    // 🔹 Example of how you might connect to your AI model or API
     const aiReply = await generateAIReply(message);
 
-    // Save chat in Firestore (optional)
+    // Save chat
     await db.collection("messages").add({
       user: user || "Anonymous",
       message,
@@ -51,22 +45,55 @@ app.post("/api/chat", async (req, res) => {
     res.json({ reply: aiReply });
   } catch (error) {
     console.error("Error in /api/chat:", error);
-    res.status(500).json({ reply: "⚠️ Internal server error. Try again later." });
+    res.status(500).json({ reply: "⚠️ Server error. Try again later." });
   }
 });
 
-// 🔹 AI reply simulation (replace with your OpenAI or Gemini API call)
 async function generateAIReply(prompt) {
-  // You can connect your actual AI key here.
-  // For now we’ll use a placeholder smart response.
-  if (prompt.toLowerCase().includes("who created you")) {
-    return "I was created by Akin S. Sokpah from Liberia. My goal is to help you learn, create, and explore!";
+  // Try Gemini first
+  if (GEMINI_API_KEY) {
+    try {
+      const geminiRes = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" +
+          GEMINI_API_KEY,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+          }),
+        }
+      );
+      const data = await geminiRes.json();
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || "Gemini could not respond.";
+    } catch (err) {
+      console.error("Gemini error:", err);
+    }
   }
 
-  // Simple mock logic for demonstration
-  return "That's a great question! Express AI will continue to learn and improve to assist you better.";
+  // If Gemini not available, use OpenAI
+  if (OPENAI_API_KEY) {
+    try {
+      const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: prompt }],
+        }),
+      });
+      const data = await openaiRes.json();
+      return data.choices?.[0]?.message?.content || "OpenAI could not respond.";
+    } catch (err) {
+      console.error("OpenAI error:", err);
+    }
+  }
+
+  return "No AI key found. Please add GEMINI_API_KEY or OPENAI_API_KEY in environment settings.";
 }
 
-// 🔹 Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Express AI backend running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Express AI running on port ${PORT}`));

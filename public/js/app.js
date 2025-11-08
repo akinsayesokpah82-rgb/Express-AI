@@ -1,83 +1,70 @@
-// public/js/app.js
-const chatWindow = document.getElementById("chatWindow");
-const chatForm = document.getElementById("chatForm");
-const messageInput = document.getElementById("messageInput");
-const modelSelect = document.getElementById("modelSelect");
-const fileInput = document.getElementById("fileInput");
+import { auth, googleLogin, googleLogout } from "./firebase.js";
 
-let conversation = [];
+const chatContainer = document.getElementById("chatContainer");
+const chatInput = document.getElementById("chatInput");
+const sendBtn = document.getElementById("sendBtn");
+const authButtons = document.getElementById("authButtons");
 
-function appendMessage(role, text) {
-  const wrapper = document.createElement("div");
-  wrapper.className = `msg ${role === "user" ? "user" : "assistant"}`;
+let currentUser = null;
+let groupMessages = [];
 
-  const bubble = document.createElement("div");
-  bubble.className = "bubble";
-  bubble.textContent = text;
-
-  wrapper.appendChild(bubble);
-  chatWindow.appendChild(wrapper);
-  chatWindow.scrollTop = chatWindow.scrollHeight;
+// Simulate a global group chat stored in memory for demo
+function renderMessages() {
+  chatContainer.innerHTML = "";
+  groupMessages.forEach(m => {
+    const div = document.createElement("div");
+    div.className = "p-2 rounded-lg";
+    div.classList.add(m.sender === "Express AI" ? "bg-blue-700" : "bg-gray-700");
+    div.innerHTML = `<strong>${m.sender}:</strong> ${m.text}`;
+    chatContainer.appendChild(div);
+  });
+  chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-chatForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const text = messageInput.value.trim();
+function postMessage(sender, text) {
+  groupMessages.push({ sender, text });
+  renderMessages();
+}
+
+sendBtn.addEventListener("click", async () => {
+  const text = chatInput.value.trim();
   if (!text) return;
-
-  appendMessage("user", text);
-  conversation.push({ role: "user", content: text });
-  messageInput.value = "";
-
-  // If file attached, we could handle it here (this demo only informs)
-  if (fileInput.files.length) {
-    const f = fileInput.files[0];
-    appendMessage("assistant", `⚠️ Note: file "${f.name}" received by client, but this demo does not upload files to server. To enable file upload, add backend handling.`);
-  }
-
-  appendMessage("assistant", "… Thinking …");
-
-  try {
-    const resp = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: modelSelect.value,
-        messages: conversation
-      })
-    });
-
-    if (!resp.ok) {
-      const err = await resp.json().catch(()=>({error:"unknown"}));
-      throw new Error(err?.error || err?.detail || resp.statusText);
-    }
-
-    const data = await resp.json();
-    // Extract assistant message
-    const assistantMsg = data.choices && data.choices[0] && data.choices[0].message
-      ? data.choices[0].message.content
-      : JSON.stringify(data);
-
-    // remove the "… Thinking …" message (last assistant bubble)
-    const lastBubble = Array.from(chatWindow.querySelectorAll(".msg.assistant .bubble")).pop();
-    if (lastBubble && lastBubble.textContent === "… Thinking …") {
-      lastBubble.textContent = assistantMsg;
-    } else {
-      appendMessage("assistant", assistantMsg);
-    }
-
-    conversation.push({ role: "assistant", content: assistantMsg });
-
-  } catch (err) {
-    console.error(err);
-    appendMessage("assistant", "Error: " + String(err.message || err));
-  }
+  postMessage(currentUser?.displayName || "Anonymous", text);
+  chatInput.value = "";
+  await aiObserver(text);
 });
 
-// lightweight enter-to-send
-messageInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    chatForm.dispatchEvent(new Event("submit", { cancelable: true }));
+async function aiObserver(userText) {
+  // AI monitors the chat and replies if needed
+  const res = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: "You are Express AI observing a group chat. Help, clarify, or correct misunderstandings politely." },
+        { role: "user", content: userText }
+      ]
+    })
+  });
+  const data = await res.json();
+  const reply = data.choices?.[0]?.message?.content ?? "🤖 (no response)";
+  postMessage("Express AI", reply);
+}
+
+// Firebase Auth UI
+auth.onAuthStateChanged(user => {
+  if (user) {
+    currentUser = user;
+    authButtons.innerHTML = `
+      <img src="${user.photoURL}" class="w-8 h-8 rounded-full inline-block mr-2" />
+      <span>${user.displayName}</span>
+      <button class="ml-2 px-3 py-1 bg-red-600 rounded" id="logoutBtn">Logout</button>`;
+    document.getElementById("logoutBtn").onclick = googleLogout;
+    postMessage("System", `👋 ${user.displayName} joined the College Students Group Chat`);
+  } else {
+    currentUser = null;
+    authButtons.innerHTML = `<button class="px-4 py-2 bg-green-600 rounded" id="loginBtn">Sign in with Google</button>`;
+    document.getElementById("loginBtn").onclick = googleLogin;
   }
 });

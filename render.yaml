@@ -1,10 +1,8 @@
 services:
   - type: web
-    name: express-ai
+    name: express-ai-v2
     env: node
-    repo: https://github.com/akinsayesokpah82-rgb/Express-AI
+    repo: https://github.com/YOUR_USER/Express-AI
     branch: main
-    plan: free
-    buildCommand: ""
     startCommand: "node server.js"
-    region: oregon
+    plan: free

@@ -1,202 +1,78 @@
-// public/js/app.js
-import { auth, googleLogin, googleLogout, db, onAuth } from "./firebase.js";
-import {
-  collection, addDoc, doc, setDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-let currentUser = null;
-let currentRoomId = "college-group";
-
-const roomsListEl = document.getElementById("roomsList");
-const messagesEl = document.getElementById("messages");
-const chatInput = document.getElementById("chatInput");
-const sendBtn = document.getElementById("sendBtn");
-const fileBtn = document.getElementById("fileBtn");
-const fileInput = document.getElementById("fileInput");
-const authButtons = document.getElementById("authButtons");
-const presenceList = document.getElementById("presenceList");
-const roomTitle = document.getElementById("roomTitle");
-const newRoomBtn = document.getElementById("newRoomBtn");
-const modelSelect = document.getElementById("modelSelect");
-const announceBtn = document.getElementById("announceBtn");
-
-// ensure default room
-async function ensureRoom(id) {
-  const r = doc(db, "rooms", id);
-  await setDoc(r, { id, title: "College Students Group Chat", public: true }, { merge: true });
-}
-ensureRoom(currentRoomId);
-
-// load list of rooms
-async function loadRooms() {
-  const snap = await getDocs(collection(db, "rooms"));
-  roomsListEl.innerHTML = "";
-  snap.forEach(d => {
-    const data = d.data();
-    const b = document.createElement("button");
-    b.textContent = data.title || data.id;
-    b.className = "w-full text-left p-2 rounded hover:bg-white/3 mb-1";
-    b.onclick = () => switchRoom(data.id, data.title);
-    roomsListEl.appendChild(b);
-  });
-}
-loadRooms();
-
-// switch room and start listening
-let unsubMessages = null;
-function switchRoom(roomId, title) {
-  currentRoomId = roomId;
-  roomTitle.textContent = title || roomId;
-  if (unsubMessages) unsubMessages();
-  const msgsRef = collection(db, "rooms", roomId, "messages");
-  const q = query(msgsRef, orderBy("timestamp"));
-  unsubMessages = onSnapshot(q, (snap) => {
-    messagesEl.innerHTML = "";
-    snap.forEach(docSnap => {
-      const m = docSnap.data();
-      renderMessage(m);
-    });
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  });
-}
-switchRoom(currentRoomId, "College Students Group Chat");
-
-// render message
-function renderMessage(m) {
-  const wrapper = document.createElement("div");
-  wrapper.className = "flex " + ((currentUser && m.sender === currentUser.displayName) ? "justify-end" : "justify-start");
-  const bubble = document.createElement("div");
-  bubble.className = "bubble " + (m.sender === "Express AI" ? "bg-blue-700" : "bg-gray-700");
-  const ts = m.timestamp && m.timestamp.toDate ? new Date(m.timestamp.toDate()).toLocaleTimeString() : "";
-  bubble.innerHTML = `<div class="text-xs text-white/60"><strong>${m.sender}</strong> ${ts}</div><div style="white-space:pre-wrap">${m.text}</div>`;
-  if (m.fileUrl) {
-    const a = document.createElement("a");
-    a.href = m.fileUrl;
-    a.target = "_blank";
-    a.textContent = `Attachment: ${m.fileName}`;
-    a.className = "block mt-2 underline text-sm";
-    bubble.appendChild(a);
-  }
-  wrapper.appendChild(bubble);
-  messagesEl.appendChild(wrapper);
-}
-
-// sending messages
-sendBtn.onclick = async () => {
-  const text = chatInput.value.trim();
-  if (!text) return;
-  await addDoc(collection(db, "rooms", currentRoomId, "messages"), {
-    sender: currentUser ? currentUser.displayName : "Anonymous",
-    text,
-    fileUrl: null,
-    fileName: null,
-    timestamp: serverTimestamp()
-  });
-  chatInput.value = "";
-
-  // trigger AI only if message contains @expressai (case-insensitive)
-  if (text.toLowerCase().includes("@expressai")) {
-    triggerAI(text);
-  }
-};
-
-// file upload
-fileBtn.onclick = () => fileInput.click();
-fileInput.onchange = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const fd = new FormData();
-  fd.append("file", file);
-  const resp = await fetch("/api/upload", { method: "POST", body: fd });
-  const j = await resp.json();
-  if (j.ok) {
-    await addDoc(collection(db, "rooms", currentRoomId, "messages"), {
-      sender: currentUser ? currentUser.displayName : "Anonymous",
-      text: `[Uploaded file: ${j.file.name}]`,
-      fileUrl: j.file.url,
-      fileName: j.file.name,
-      timestamp: serverTimestamp()
-    });
-  } else {
-    alert("Upload failed");
-  }
-};
-
-// trigger AI via backend
-async function triggerAI(userText) {
-  // add a quick thinking notice (so users see AI is responding)
-  await addDoc(collection(db, "rooms", currentRoomId, "messages"), {
-    sender: "Express AI",
-    text: "Express AI is thinking...",
-    timestamp: serverTimestamp()
-  });
-
+// --- News
+document.getElementById("newsBtn").onclick = async () => {
   try {
-    const resp = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        messages: [{ role: "user", content: userText }],
-        model: modelSelect.value || "gpt-3.5-turbo"
-      })
+    const q = prompt("Search news for (leave blank for top headlines):", "");
+    const url = "/api/news" + (q ? "?q=" + encodeURIComponent(q) : "");
+    const r = await fetch(url);
+    const j = await r.json();
+    if (!j.ok) return alert("News failed: " + (j.error||""));
+    // show headlines in a simple modal or chat
+    const articles = j.data.articles || [];
+    const top = articles.slice(0, 6).map(a => `${a.title} — ${a.source.name}\n${a.url}`).join("\n\n");
+    await addDoc(collection(db, "rooms", currentRoomId, "messages"), {
+      sender: "News",
+      text: top || "No news",
+      timestamp: serverTimestamp()
     });
-    const data = await resp.json();
-    const reply = data.choices && data.choices[0] && data.choices[0].message ? data.choices[0].message.content : "Sorry, I couldn't generate a reply.";
+  } catch (e) { alert("News error: "+e.message); }
+};
 
-    // post AI reply
-    await addDoc(collection(db, "rooms", currentRoomId, "messages"), {
-      sender: "Express AI",
-      text: reply,
-      timestamp: serverTimestamp()
-    });
-  } catch (err) {
-    console.error("AI error", err);
-    await addDoc(collection(db, "rooms", currentRoomId, "messages"), {
-      sender: "Express AI",
-      text: "Error generating response.",
-      timestamp: serverTimestamp()
-    });
-  }
+// --- Weather
+document.getElementById("weatherBtn").onclick = async () => {
+  try {
+    const city = prompt("Enter city (e.g., Monrovia):", "Monrovia");
+    const r = await fetch(`/api/weather?city=${encodeURIComponent(city)}`);
+    const j = await r.json();
+    if (!j.ok) return alert("Weather failed: " + (j.error||""));
+    const d = j.data;
+    const txt = `${d.name}: ${d.weather?.[0]?.description || ""}. Temp: ${d.main?.temp} °C, Humidity: ${d.main?.humidity}%`;
+    await addDoc(collection(db, "rooms", currentRoomId, "messages"), { sender: "Weather", text: txt, timestamp: serverTimestamp() });
+  } catch (e) { alert("Weather error: "+e.message); }
+};
+
+// --- Sports
+document.getElementById("sportsBtn").onclick = async () => {
+  try {
+    const league = prompt("Enter league or team query (example: EPL or Liverpool):", "");
+    const url = `/api/sports?league=${encodeURIComponent(league)}`;
+    const r = await fetch(url);
+    const j = await r.json();
+    if (!j.ok) return alert("Sports failed: "+(j.error||""));
+    await addDoc(collection(db, "rooms", currentRoomId, "messages"), { sender: "Sports", text: JSON.stringify(j.data).slice(0,1500), timestamp: serverTimestamp() });
+  } catch (e) { alert("Sports error: "+e.message); }
+};
+
+// --- Subject bots helper
+async function askSubject(subject) {
+  const q = prompt(`Ask ${subject} AI:`, "");
+  if (!q) return;
+  try {
+    const resp = await fetch("/api/subject", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ subject, messages: [{ role: "user", content: q }] }) });
+    const j = await resp.json();
+    if (!j.ok) return alert("Subject AI failed: " + (j.error||""));
+    const reply = j.data.choices?.[0]?.message?.content || JSON.stringify(j.data);
+    await addDoc(collection(db, "rooms", currentRoomId, "messages"), { sender: `${subject} AI`, text: reply, timestamp: serverTimestamp() });
+  } catch (e) { alert("Subject error: "+e.message); }
 }
+document.getElementById("nursingBtn").onclick = ()=>askSubject("nursing");
+document.getElementById("mathBtn").onclick = ()=>askSubject("math");
+document.getElementById("englishBtn").onclick = ()=>askSubject("english");
+document.getElementById("monetizeBtn").onclick = ()=>askSubject("monetize");
 
-// Auth UI - show login/logout and presence
-onAuth((user) => {
-  currentUser = user;
-  if (user) {
-    authButtons.innerHTML = `<img src="${user.photoURL}" class="w-8 h-8 rounded-full inline-block mr-2" /> ${user.displayName} <button id="logoutBtn" class="ml-2 px-3 py-1 bg-red-600 rounded">Logout</button>`;
-    document.getElementById("logoutBtn").onclick = async () => { await googleLogout(); };
-    // announce join
-    addDoc(collection(db, "rooms", currentRoomId, "messages"), {
-      sender: "System",
-      text: `👋 ${user.displayName} joined the room.`,
+// --- Song generator
+document.getElementById("songBtn").onclick = async () => {
+  const promptText = prompt("Enter song idea / theme (e.g., 'love and freedom'):");
+  if (!promptText) return;
+  const style = prompt("Enter style (pop, reggae, hiphop, gospel...):", "pop");
+  const length = prompt("Structure (verse-chorus, chorus-verse-chorus):", "verse-chorus");
+  try {
+    const r = await fetch("/api/song", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt: promptText, style, length }) });
+    const j = await r.json();
+    if (!j.ok) return alert("Song failed: " + (j.error||""));
+    await addDoc(collection(db, "rooms", currentRoomId, "messages"), {
+      sender: "Song AI",
+      text: j.lyrics || "No lyrics",
       timestamp: serverTimestamp()
     });
-  } else {
-    authButtons.innerHTML = `<button id="loginBtn" class="px-3 py-1 bg-green-600 rounded">Sign in with Google</button>`;
-    document.getElementById("loginBtn").onclick = async () => { await googleLogin(); };
-  }
-});
-
-// new room creator
-newRoomBtn.onclick = async () => {
-  const id = prompt("Enter room id (eg. math-101):");
-  if (!id) return;
-  const title = prompt("Room title:", id) || id;
-  await setDoc(doc(db, "rooms", id), { id, title, public: true });
-  loadRooms();
-  switchRoom(id, title);
+  } catch (e) { alert("Song error: "+e.message); }
 };
-
-// announce (simple)
-announceBtn.onclick = async () => {
-  const msg = prompt("Enter announcement:");
-  if (!msg) return;
-  await addDoc(collection(db, "rooms", currentRoomId, "messages"), {
-    sender: "Announcement",
-    text: msg,
-    timestamp: serverTimestamp()
-  });
-};
-
-// listen for rooms updates
-onSnapshot(collection(db, "rooms"), () => loadRooms());

@@ -4,7 +4,8 @@ import {
   getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp
+  getFirestore, collection, addDoc, query, orderBy, onSnapshot,
+  serverTimestamp, doc, setDoc, updateDoc, getDoc, getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -15,16 +16,19 @@ const firebaseConfig = {
   messagingSenderId: "113569186739",
   appId: "1:113569186739:web:d8daf21059f43a79e841c6"
 };
-
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const provider = new GoogleAuthProvider();
 export const db = getFirestore(app);
 
-export async function googleLogin() {
-  await signInWithPopup(auth, provider);
+// helper to mark presence/typing in `presence/{uid}`
+export async function setPresence(uid, data) {
+  const ref = doc(db, "presence", uid);
+  await setDoc(ref, { ...data, lastSeen: serverTimestamp() }, { merge: true });
 }
-
-export async function googleLogout() {
-  await signOut(auth);
+export async function clearPresence(uid) {
+  const ref = doc(db, "presence", uid);
+  await setDoc(ref, { online: false, typing: false, lastSeen: serverTimestamp() }, { merge: true });
 }
+export async function googleLogin() { await signInWithPopup(auth, provider); }
+export async function googleLogout() { await signOut(auth); }

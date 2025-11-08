@@ -1,14 +1,10 @@
-// public/sw.js - very small cache-first SW for app shell
-const CACHE = "expressai-v5-v1";
+const CACHE = "expressai-cache-v1";
+const URLS = ["/", "/index.html", "/manifest.json", "/logo-192.png", "/logo-512.png"];
+
 self.addEventListener("install", (e) => {
-  e.waitUntil(
-    caches.open(CACHE).then((c) =>
-      c.addAll(["/", "/index.html", "/manifest.json"])
-    )
-  );
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(URLS)));
 });
+
 self.addEventListener("fetch", (e) => {
-  e.respondWith(
-    caches.match(e.request).then((r) => r || fetch(e.request))
-  );
+  e.respondWith(caches.match(e.request).then((r) => r || fetch(e.request)));
 });

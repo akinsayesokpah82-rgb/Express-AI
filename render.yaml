@@ -2,7 +2,7 @@ services:
   - type: web
     name: express-ai-v2
     env: node
-    repo: https://github.com/YOUR_USER/Express-AI
+    repo: https://github.com/akinsayesokpah82-rgb/Express-AI
     branch: main
     startCommand: "node server.js"
     plan: free

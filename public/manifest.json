@@ -1,10 +1,9 @@
 {
   "name": "Express AI",
   "short_name": "ExpressAI",
-  "description": "Express AI — intelligent assistant by Akin S. Sokpah",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#111827",
+  "background_color": "#071026",
   "theme_color": "#111827",
   "icons": [
     { "src": "/logo-192.png", "sizes": "192x192", "type": "image/png" },

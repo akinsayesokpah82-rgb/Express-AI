@@ -7,7 +7,7 @@ import {
   getFirestore, collection, addDoc, doc, setDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Your Firebase config (you said it's configured)
+// Your Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyC7cAN-mrE2PvmlQ11zLKAdHBhN7nUFjHw",
   authDomain: "fir-u-c-students-web.firebaseapp.com",
@@ -22,13 +22,6 @@ export const auth = getAuth(app);
 export const provider = new GoogleAuthProvider();
 export const db = getFirestore(app);
 
-// Auth helpers
-export async function googleLogin() {
-  await signInWithPopup(auth, provider);
-}
-export async function googleLogout() {
-  await signOut(auth);
-}
-export function onAuth(cb) {
-  onAuthStateChanged(auth, cb);
-}
+export async function googleLogin() { await signInWithPopup(auth, provider); }
+export async function googleLogout() { await signOut(auth); }
+export function onAuth(cb) { onAuthStateChanged(auth, cb); }
